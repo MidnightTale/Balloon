@@ -1,0 +1,4 @@
+name: Balloon
+version: '${version}'
+main: net.hynse.balloon.Balloon
+api-version: '1.20'
