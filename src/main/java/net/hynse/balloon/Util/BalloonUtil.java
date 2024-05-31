@@ -134,10 +134,7 @@ public class BalloonUtil {
 
         @Override
         public void run() {
-
-            instance.getLogger().info("task");
             if (parrot.getPersistentDataContainer().has(instance.balloonCleanUpKey)) {
-                instance.getLogger().info("go up bruh");
                 double playerHeadY = player.getLocation().getY() + player.getEyeHeight();
                 double parrotY = parrot.getLocation().getY();
                 double parrotX = parrot.getLocation().getX();
@@ -145,9 +142,9 @@ public class BalloonUtil {
                 double playerX = player.getLocation().getX();
                 double playerZ = player.getLocation().getZ();
 
-                final double radius = 3.2;
-                final double height = 2.6;
-                final double halfSphereHeight = 2.6;
+                final double radius = 2.0;
+                final double height = 3.2;
+                final double halfSphereHeight = 3.2;
 
                 double distanceXZSquared = Math.pow(parrotX - playerX, 2) + Math.pow(parrotZ - playerZ, 2);
                 double distanceYAboveCylinder = parrotY - (playerHeadY + height - halfSphereHeight);
@@ -164,7 +161,7 @@ public class BalloonUtil {
 
                     if (distanceSquared != 0) {
                         double distance = Math.sqrt(distanceSquared);
-                        double factor = 0.18 / distance;
+                        double factor = 0.05 / distance;
                         double pushX = (parrotX - playerX) * factor;
                         double pushY = (parrotY - playerHeadY) * factor;
                         double pushZ = (parrotZ - playerZ) * factor;
@@ -182,20 +179,20 @@ public class BalloonUtil {
                 double lowAddition = playerHeadY + 0.8;
 
                 if (parrotY < highAddition) {
-                    Vector velocityToAdd = new Vector(0, 0.23, 0);
+                    Vector velocityToAdd = new Vector(0, 0.18, 0);
                     parrot.setVelocity(velocityToAdd);
                     instance.getLogger().info("High velocity applied");
-                    player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
+                    //player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
                 } else if (parrotY < mediumAddition) {
-                    Vector velocityToAdd = new Vector(0, 0.15, 0);
+                    Vector velocityToAdd = new Vector(0, 0.07, 0);
                     parrot.setVelocity(velocityToAdd);
                     instance.getLogger().info("Medium velocity applied");
-                    player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
+                    //player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
                 } else if (parrotY < lowAddition) {
-                    Vector velocityToAdd = new Vector(0, 0.08, 0);
+                    Vector velocityToAdd = new Vector(0, 0.03, 0);
                     parrot.setVelocity(velocityToAdd);
                     instance.getLogger().info("Low velocity applied");
-                    player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
+                    //player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
                 }
 //                Location playerLocation = player.getLocation();
 //                Location parrotLocation = parrot.getLocation();
@@ -208,7 +205,7 @@ public class BalloonUtil {
 //                    parrot.setLeashHolder(player);
 //                    parrot.teleportAsync(teleportLocation);
 //                }
-                spawnParticleOutline(player.getLocation(), radius, height, halfSphereHeight);
+                //spawnParticleOutline(player.getLocation(), radius, height, halfSphereHeight);
             } else {
                 cancel();
             }
