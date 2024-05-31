@@ -37,12 +37,12 @@ public class FlatData {
                     playerData.putCustomModelData(playerId, customModelData);
                     playerData.putBalloonShow(playerId, show);
                     Balloon.instance.getLogger().info(
-                            "Loaded player data ------------\n" +
+                            "Loaded player data \n" +
                             "UUID: " + playerId +
                             "\nlinkedId: " + linkedId +
                             "\ncustomModelData: " + customModelData +
                             "\nshow: " + show +
-                            "--------------------");
+                            "\n--------------------");
                 }
             }
         }
@@ -66,12 +66,12 @@ public class FlatData {
                     playerSection.set("customModelData", customModelData);
                     playerSection.set("show", show);
                     Balloon.instance.getLogger().info(
-                            "Saved player data ------------\n" +
+                            "Saved player data\n" +
                             "UUID: " + playerId +
                             "\nlinkedId: " + linkedId +
                             "\ncustomModelData: " + customModelData +
                             "\nshow: " + show +
-                            "--------------------");
+                            "\n--------------------");
                 }
             }
         }
