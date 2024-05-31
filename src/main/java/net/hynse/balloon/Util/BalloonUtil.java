@@ -89,7 +89,7 @@ public class BalloonUtil {
 
         // Add the armor stand as a passenger to the parrot
         parrot.addPassenger(balloon);
-        new BalloonFloatTask(parrot, player).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
+        new BalloonFloatTask(parrot, player).runTaskTimerAtEntity(Balloon.instance, parrot, 1, Balloon.instance.delay);
 
         //Balloon.instance.getLogger().info(player + "spawnBalloon" + customModelData);
     }
@@ -181,17 +181,17 @@ public class BalloonUtil {
                 if (parrotY < highAddition) {
                     Vector velocityToAdd = new Vector(0, 0.18, 0);
                     parrot.setVelocity(velocityToAdd);
-                    instance.getLogger().info("High velocity applied");
+                    //instance.getLogger().info("High velocity applied");
                     //player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
                 } else if (parrotY < mediumAddition) {
                     Vector velocityToAdd = new Vector(0, 0.07, 0);
                     parrot.setVelocity(velocityToAdd);
-                    instance.getLogger().info("Medium velocity applied");
+                    //instance.getLogger().info("Medium velocity applied");
                     //player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
                 } else if (parrotY < lowAddition) {
                     Vector velocityToAdd = new Vector(0, 0.03, 0);
                     parrot.setVelocity(velocityToAdd);
-                    instance.getLogger().info("Low velocity applied");
+                    //instance.getLogger().info("Low velocity applied");
                     //player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
                 }
 //                Location playerLocation = player.getLocation();
