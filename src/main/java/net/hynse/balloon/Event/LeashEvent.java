@@ -1,11 +1,8 @@
 package net.hynse.balloon.Event;
 
-import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
 import net.hynse.balloon.Balloon;
-import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Parrot;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;

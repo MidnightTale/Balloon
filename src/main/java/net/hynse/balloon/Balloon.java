@@ -1,30 +1,23 @@
 package net.hynse.balloon;
 
 import me.nahu.scheduler.wrapper.FoliaWrappedJavaPlugin;
-import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
 import net.hynse.balloon.Command.balloon;
 import net.hynse.balloon.Data.FlatData;
 import net.hynse.balloon.Data.PlayerData;
 import net.hynse.balloon.Event.LeashEvent;
 import net.hynse.balloon.Event.PlayerEvent;
+import net.hynse.balloon.Event.WorldEvent;
 import net.hynse.balloon.Gui.ControllerGUI;
 import net.hynse.balloon.Gui.ItemGUI;
 import net.hynse.balloon.Gui.SelectionGUI;
 import net.hynse.balloon.Util.BalloonUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Parrot;
 import org.bukkit.event.Listener;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.io.File;
 import java.util.Objects;
-import java.util.UUID;
 
 public class Balloon extends FoliaWrappedJavaPlugin implements Listener {
     public static Balloon instance;
@@ -34,6 +27,7 @@ public class Balloon extends FoliaWrappedJavaPlugin implements Listener {
     public static ItemGUI itemGUI;
     public static SelectionGUI selectionGUI;
     public static FlatData flatData;
+    public static PlayerEvent playerEvent;
 
     public Material balloonItem = Material.FEATHER;
     public NamespacedKey balloonCleanUpKey = new NamespacedKey(this, "balloonCleanUp");
@@ -58,9 +52,12 @@ public class Balloon extends FoliaWrappedJavaPlugin implements Listener {
         itemGUI = new ItemGUI();
         selectionGUI = new SelectionGUI();
         flatData = new FlatData();
+        playerEvent = new PlayerEvent();
+        new WorldEvent.WorldChangeTask().runTaskTimer(this, 1, 1);
         Objects.requireNonNull(getCommand("balloon")).setExecutor(new balloon());
         getServer().getPluginManager().registerEvents(new LeashEvent(), this);
         getServer().getPluginManager().registerEvents(new PlayerEvent(), this);
+        getServer().getPluginManager().registerEvents(new WorldEvent(), this);
         getServer().getPluginManager().registerEvents(new ControllerGUI(), this);
 
         getServer().getPluginManager().registerEvents(this, this);

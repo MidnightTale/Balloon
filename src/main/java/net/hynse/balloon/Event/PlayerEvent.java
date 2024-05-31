@@ -1,5 +1,6 @@
 package net.hynse.balloon.Event;
 
+import io.papermc.paper.event.player.PlayerTrackEntityEvent;
 import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
 import net.hynse.balloon.Balloon;
 import net.hynse.balloon.Util.BalloonUtil;
@@ -7,9 +8,12 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
@@ -69,7 +73,28 @@ public class PlayerEvent implements Listener {
         }.runTaskTimerAtEntity(Balloon.instance, player, 1, 4 * 20);
     }
 
-    private void RestoreBalloon (Boolean state, Player player) {
+//    @EventHandler
+//    public void onPlayerTeleport(PlayerTrackEntityEvent event) {
+//        Balloon.instance.getLogger().info("onPlayerTeleport");
+//        Entity entity = event.getEntity();
+//        if (entity instanceof Player player) {
+//            Balloon.instance.getLogger().info("onPlayerTeleport found player");
+//            UUID playerId = player.getUniqueId();
+//            if (playerData.getBalloonShow(playerId) != null) {
+//                Balloon.instance.getLogger().info("onPlayerTeleport state is not null");
+//                boolean isShow = playerData.getBalloonShow(playerId);
+//                int customModelData = playerData.getBalloonCustomModelData(playerId);
+//                if (isShow) {
+//                    Balloon.instance.getLogger().info("onPlayerTeleport state is on");
+//                    RemoveBalloon(player);
+//                    balloonUtil.spawnOrUpdateBalloon(player, customModelData);
+//                }
+//            }
+//        }
+//    }
+
+
+    public void RestoreBalloon(Boolean state, Player player) {
         UUID playerId = player.getUniqueId();
         if (state != null && state) {
             UUID linkId = playerData.getLinked(playerId);
@@ -92,7 +117,7 @@ public class PlayerEvent implements Listener {
         }
     }
 
-    private void RemoveBalloon (Player player) {
+    public void RemoveBalloon(Player player) {
         Entity linkedEntity = null;
         UUID playerId = player.getUniqueId();
         UUID linkId = playerData.getLinked(playerId);
@@ -107,6 +132,7 @@ public class PlayerEvent implements Listener {
                 if (passenger instanceof ArmorStand balloon) {
                         balloon.remove();
                         parrot.remove();
+                        playerData.removeLinked(playerId);
                 }
             }
         }

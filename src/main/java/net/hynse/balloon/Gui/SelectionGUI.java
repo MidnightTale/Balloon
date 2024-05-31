@@ -1,6 +1,5 @@
 package net.hynse.balloon.Gui;
 
-import net.hynse.balloon.Balloon;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;

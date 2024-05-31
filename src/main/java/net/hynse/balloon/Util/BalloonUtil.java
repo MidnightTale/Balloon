@@ -2,16 +2,15 @@ package net.hynse.balloon.Util;
 
 import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
 import net.hynse.balloon.Balloon;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import static net.hynse.balloon.Balloon.*;
@@ -32,12 +31,16 @@ public class BalloonUtil {
         }
     }
 
-    public void spawnBalloon(Player player ,UUID playerId ,int customModelData) {
+    public void spawnBalloon(Player player, UUID playerId, int customModelData) {
+        // Spawn the parrot
         Parrot parrot = (Parrot) player.getWorld().spawnEntity(player.getLocation().add(1, 2, 1), EntityType.PARROT);
+        // Spawn the armor stand
         ArmorStand balloon = (ArmorStand) player.getWorld().spawnEntity(player.getLocation().add(0, 1, 0), EntityType.ARMOR_STAND);
+
         UUID parrotId = parrot.getUniqueId();
-        new BalloonFloatTask(parrot).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
         playerData.putLinked(playerId, parrotId);
+
+        // Configure the parrot
         parrot.setTamed(true);
         parrot.setOwner(player);
         parrot.setLeashHolder(player);
@@ -45,14 +48,16 @@ public class BalloonUtil {
         parrot.setVariant(Parrot.Variant.GRAY);
         parrot.setAdult();
         parrot.setCollidable(false);
-        parrot.setInvulnerable(true);
         parrot.setInvisible(true);
         parrot.setBreed(false);
-        parrot.setHealth(20);
+        parrot.setLootTable(null);
+        Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_SCALE)).setBaseValue(0.4);
+        Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_ARMOR)).setBaseValue(1024);
+        Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(1024);
 
-        NamespacedKey key = new NamespacedKey(Balloon.instance, "balloonCleanUp");
-        parrot.getPersistentDataContainer().set(instance.balloonCleanUpKey, PersistentDataType.BOOLEAN, true);
+        parrot.getPersistentDataContainer().set(Balloon.instance.balloonCleanUpKey, PersistentDataType.BOOLEAN, true);
 
+        // Configure the armor stand
         balloon.setCollidable(false);
         balloon.setInvisible(true);
         balloon.setInvulnerable(true);
@@ -61,17 +66,25 @@ public class BalloonUtil {
         balloon.setGravity(false);
         balloon.setArms(false);
         balloon.setMarker(true);
-        balloon.setHeadPose(new EulerAngle(Math.toRadians(180), Math.toRadians(0), Math.toRadians(0)));
+        balloon.setDisabledSlots(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND, EquipmentSlot.OFF_HAND);
 
+        // Set the custom model data for the armor stand's helmet
         ItemStack itemStack = new ItemStack(Balloon.instance.balloonItem);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setCustomModelData(customModelData);
         itemStack.setItemMeta(itemMeta);
         balloon.getEquipment().setHelmet(itemStack);
-        //balloon.customName(Component.text(player.getName() + "'s Balloon"));
+
+        // Ensure that the custom name is hidden
         balloon.setCustomNameVisible(false);
+
+        // Add the armor stand as a passenger to the parrot
         parrot.addPassenger(balloon);
+        new BalloonFloatTask(parrot).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
+
+        //Balloon.instance.getLogger().info(player + "spawnBalloon" + customModelData);
     }
+
 
     private void updateBalloon(UUID linkId, int customModelData, Player player) {
         Entity linkedEntity = null;
@@ -82,6 +95,8 @@ public class BalloonUtil {
             }
         }
         if (linkedEntity instanceof Parrot parrot) {
+            parrot.teleportAsync(player.getLocation().add(0,2,0));
+            parrot.setLeashHolder(player);
             if (!parrot.getPassengers().isEmpty()) {
                 Entity passenger = parrot.getPassengers().getFirst();
                 if (passenger instanceof ArmorStand balloon) {
@@ -137,17 +152,17 @@ public class BalloonUtil {
                 if (parrotY < playerHeadY + 0.2) {
                     parrot.setVelocity(parrot.getVelocity().setY(0.24));
                 }
-                Location playerLocation = player.getLocation();
-                Location parrotLocation = parrot.getLocation();
-
-                distanceSquared = parrotLocation.distanceSquared(playerLocation);
-
-                final double maxDistanceSquared = 32;
-                if (distanceSquared > maxDistanceSquared) {
-                    Location teleportLocation = playerLocation.clone().add(0, 3, 0);
-                    parrot.setLeashHolder(player);
-                    parrot.teleportAsync(teleportLocation);
-                }
+//                Location playerLocation = player.getLocation();
+//                Location parrotLocation = parrot.getLocation();
+//
+//                distanceSquared = parrotLocation.distanceSquared(playerLocation);
+//
+//                final double maxDistanceSquared = 32;
+//                if (distanceSquared > maxDistanceSquared) {
+//                    Location teleportLocation = playerLocation.clone().add(0, 3, 0);
+//                    parrot.setLeashHolder(player);
+//                    parrot.teleportAsync(teleportLocation);
+//                }
             } else {
                 cancel();
             }
