@@ -33,7 +33,7 @@ public class Balloon extends FoliaWrappedJavaPlugin implements Listener {
     public NamespacedKey balloonCleanUpKey = new NamespacedKey(this, "balloonCleanUp");
     public File configFile;
     public FileConfiguration config;
-    public Integer delay = 8;
+    public Integer delay = 3;
 
     @Override
     public void onEnable() {
