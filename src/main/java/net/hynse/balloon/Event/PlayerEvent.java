@@ -108,7 +108,7 @@ public class PlayerEvent implements Listener {
                 if (linkedEntity instanceof Parrot parrot) {
                     parrot.teleportAsync(player.getLocation().add(0, 1, 0));
                     parrot.setLeashHolder(player);
-                    new BalloonUtil.BalloonFloatTask(parrot).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
+                    new BalloonUtil.BalloonFloatTask(parrot, player).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
                 }
             } else {
                 int customModelData = playerData.getBalloonCustomModelData(playerId);

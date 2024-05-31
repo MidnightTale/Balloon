@@ -12,7 +12,7 @@ public class SelectionGUI {
     public void openBalloonGUI(Player player) {
         Inventory gui = Bukkit.createInventory(player, 9, Component.text("Select Balloon").color(NamedTextColor.BLUE));
 
-        gui.addItem(itemGUI.balloonOption("Balloon 1", 41210));
+        gui.addItem(itemGUI.balloonOption("Red Balloon", 41210));
         gui.addItem(itemGUI.balloonOption("Balloon 2", 41211));
         gui.addItem(itemGUI.balloonOption("Balloon 3", 41212));
         gui.addItem(itemGUI.balloonOption("Balloon 4", 41213));

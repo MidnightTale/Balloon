@@ -2,12 +2,15 @@ package net.hynse.balloon.Util;
 
 import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
 import net.hynse.balloon.Balloon;
+import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
 import java.util.Objects;
@@ -51,9 +54,14 @@ public class BalloonUtil {
         parrot.setInvisible(true);
         parrot.setBreed(false);
         parrot.setLootTable(null);
+        parrot.setInvulnerable(false);
         Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_SCALE)).setBaseValue(0.4);
         Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_ARMOR)).setBaseValue(1024);
+        Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_GRAVITY)).setBaseValue(0.1);
+        Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE)).setBaseValue(-0.5);
+        Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS)).setBaseValue(1024);
         Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(1024);
+        parrot.setHealth(1024);
 
         parrot.getPersistentDataContainer().set(Balloon.instance.balloonCleanUpKey, PersistentDataType.BOOLEAN, true);
 
@@ -67,6 +75,7 @@ public class BalloonUtil {
         balloon.setArms(false);
         balloon.setMarker(true);
         balloon.setDisabledSlots(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND, EquipmentSlot.OFF_HAND);
+        balloon.setHeadPose(new EulerAngle(Math.toRadians(180), Math.toRadians(0), Math.toRadians(0)));
 
         // Set the custom model data for the armor stand's helmet
         ItemStack itemStack = new ItemStack(Balloon.instance.balloonItem);
@@ -80,7 +89,7 @@ public class BalloonUtil {
 
         // Add the armor stand as a passenger to the parrot
         parrot.addPassenger(balloon);
-        new BalloonFloatTask(parrot).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
+        new BalloonFloatTask(parrot, player).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
 
         //Balloon.instance.getLogger().info(player + "spawnBalloon" + customModelData);
     }
@@ -116,14 +125,19 @@ public class BalloonUtil {
 
     public static class BalloonFloatTask extends WrappedRunnable {
         private final Parrot parrot;
+        private final Player player;
 
-        public BalloonFloatTask(Parrot parrot) {
+        public BalloonFloatTask(Parrot parrot, Player player) {
             this.parrot = parrot;
+            this.player = player;
         }
 
         @Override
         public void run() {
-            if (parrot.isLeashed() && parrot.getLeashHolder() instanceof Player player) {
+
+            instance.getLogger().info("task");
+            if (parrot.getPersistentDataContainer().has(instance.balloonCleanUpKey)) {
+                instance.getLogger().info("go up bruh");
                 double playerHeadY = player.getLocation().getY() + player.getEyeHeight();
                 double parrotY = parrot.getLocation().getY();
                 double parrotX = parrot.getLocation().getX();
@@ -131,13 +145,26 @@ public class BalloonUtil {
                 double playerX = player.getLocation().getX();
                 double playerZ = player.getLocation().getZ();
 
-                double distanceSquared = Math.pow(parrotX - playerX, 2) + Math.pow(parrotY - playerHeadY, 2) + Math.pow(parrotZ - playerZ, 2);
+                final double radius = 3.2;
+                final double height = 2.6;
+                final double halfSphereHeight = 2.6;
 
-                final double minDistanceSquared = Math.pow(0.8, 2);
-                if (distanceSquared < minDistanceSquared) {
+                double distanceXZSquared = Math.pow(parrotX - playerX, 2) + Math.pow(parrotZ - playerZ, 2);
+                double distanceYAboveCylinder = parrotY - (playerHeadY + height - halfSphereHeight);
+
+                final double minDistanceXZSquared = Math.pow(radius, 2);
+                final double minDistanceYSquared = Math.pow(radius, 2);
+
+                boolean withinCylinder = (distanceXZSquared < minDistanceXZSquared) && (parrotY <= playerHeadY + height - halfSphereHeight);
+
+                boolean withinSphereCap = (distanceXZSquared + Math.pow(distanceYAboveCylinder, 2) < minDistanceYSquared);
+
+                if (withinCylinder || withinSphereCap) {
+                    double distanceSquared = Math.pow(parrotX - playerX, 2) + Math.pow(parrotY - playerHeadY, 2) + Math.pow(parrotZ - playerZ, 2);
+
                     if (distanceSquared != 0) {
                         double distance = Math.sqrt(distanceSquared);
-                        double factor = 0.32 / distance;
+                        double factor = 0.18 / distance;
                         double pushX = (parrotX - playerX) * factor;
                         double pushY = (parrotY - playerHeadY) * factor;
                         double pushZ = (parrotZ - playerZ) * factor;
@@ -149,8 +176,26 @@ public class BalloonUtil {
                     }
                 }
 
-                if (parrotY < playerHeadY + 0.2) {
-                    parrot.setVelocity(parrot.getVelocity().setY(0.24));
+
+                double highAddition = playerHeadY + 0.4;
+                double mediumAddition = playerHeadY + 0.6;
+                double lowAddition = playerHeadY + 0.8;
+
+                if (parrotY < highAddition) {
+                    Vector velocityToAdd = new Vector(0, 0.23, 0);
+                    parrot.setVelocity(velocityToAdd);
+                    instance.getLogger().info("High velocity applied");
+                    player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
+                } else if (parrotY < mediumAddition) {
+                    Vector velocityToAdd = new Vector(0, 0.15, 0);
+                    parrot.setVelocity(velocityToAdd);
+                    instance.getLogger().info("Medium velocity applied");
+                    player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
+                } else if (parrotY < lowAddition) {
+                    Vector velocityToAdd = new Vector(0, 0.08, 0);
+                    parrot.setVelocity(velocityToAdd);
+                    instance.getLogger().info("Low velocity applied");
+                    player.getWorld().spawnParticle(Particle.GLOW, player.getLocation().add(0,highAddition,0), 0, 0, 0, 0, 0.1);
                 }
 //                Location playerLocation = player.getLocation();
 //                Location parrotLocation = parrot.getLocation();
@@ -163,10 +208,32 @@ public class BalloonUtil {
 //                    parrot.setLeashHolder(player);
 //                    parrot.teleportAsync(teleportLocation);
 //                }
+                spawnParticleOutline(player.getLocation(), radius, height, halfSphereHeight);
             } else {
                 cancel();
             }
 
+        }
+        private void spawnParticleOutline(Location location, double radius, double height, double halfSphereHeight) {
+            // Spawn particles for the cylindrical part
+            for (double y = 0; y <= height - halfSphereHeight; y += 0.1) {
+                for (double theta = 0; theta < 2 * Math.PI; theta += Math.PI / 16) {
+                    double x = radius * Math.cos(theta);
+                    double z = radius * Math.sin(theta);
+                    location.getWorld().spawnParticle(Particle.WAX_OFF, location.clone().add(x, y, z), 0, 0, 0, 0, 0.1);
+                }
+            }
+
+            // Spawn particles for the spherical cap part
+            double centerY = height - halfSphereHeight;
+            for (double phi = 0; phi <= Math.PI / 2; phi += Math.PI / 16) {
+                for (double theta = 0; theta < 2 * Math.PI; theta += Math.PI / 16) {
+                    double x = radius * Math.sin(phi) * Math.cos(theta);
+                    double y = radius * Math.cos(phi);
+                    double z = radius * Math.sin(phi) * Math.sin(theta);
+                    location.getWorld().spawnParticle(Particle.WAX_ON, location.clone().add(x, centerY + y, z), 0, 0, 0, 0, 0.1);
+                }
+            }
         }
     }
 

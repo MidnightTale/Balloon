@@ -26,7 +26,35 @@ public class ControllerGUI implements Listener {
                     int customModelData = itemMeta.getCustomModelData();
                     if (customModelData == 77677) {
                         balloonUtil.disableBalloon(player);
-                    } else {
+                    } else if (customModelData == 41210) {
+                        if (player.hasPermission("balloon.item.balloonRed")) {
+                            balloonUtil.spawnOrUpdateBalloon(player, customModelData);
+                        } else {
+                            player.sendMessage("You don't have permission to use this item.");
+                            return;
+                        }
+                    } else if (customModelData == 41211) {
+                        if (player.hasPermission("balloon.item.test2")) {
+                            balloonUtil.spawnOrUpdateBalloon(player, customModelData);
+                        } else {
+                            player.sendMessage("You don't have permission to use this item.");
+                            return;
+                        }
+                    } else if (customModelData == 41212) {
+                        if (player.hasPermission("balloon.item.test3")) {
+                            balloonUtil.spawnOrUpdateBalloon(player, customModelData);
+                        } else {
+                            player.sendMessage("You don't have permission to use this item.");
+                            return;
+                        }
+                    } else if (customModelData == 41213) {
+                        if (player.hasPermission("balloon.item.test4")) {
+                            balloonUtil.spawnOrUpdateBalloon(player, customModelData);
+                        } else {
+                            player.sendMessage("You don't have permission to use this item.");
+                            return;
+                        }
+                    }  else {
                         balloonUtil.spawnOrUpdateBalloon(player, customModelData);
                     }
                 }
