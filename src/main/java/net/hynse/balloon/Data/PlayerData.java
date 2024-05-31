@@ -37,7 +37,7 @@ public class PlayerData {
         linked.remove(playerId);
     }
 
-    public void removeBalloonName(UUID playerId) {
+    public void removeBalloonCustomModelData(UUID playerId) {
         balloonCustomModelData.remove(playerId);
     }
 
@@ -47,5 +47,11 @@ public class PlayerData {
 
     public Map<UUID, UUID> getLinkedMap() {
         return linked;
+    }
+    public Map<UUID, Integer> getBalloonCustomModelDataMap() {
+        return balloonCustomModelData;
+    }
+    public Map<UUID, Boolean> getBalloonShowMap() {
+        return balloonShow;
     }
 }

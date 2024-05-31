@@ -1,6 +1,7 @@
 package net.hynse.balloon.Event;
 
 import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
+import net.hynse.balloon.Balloon;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Parrot;
@@ -46,7 +47,7 @@ public class PlayerEvent implements Listener {
                     cancel();
                 }
             }
-        }.runTaskTimerAtEntity(instance, player, 1, 4 * 20);
+        }.runTaskTimerAtEntity(Balloon.instance, player, 1, 4 * 20);
     }
 
     private void RestoreBalloon (Boolean state, Player player) {

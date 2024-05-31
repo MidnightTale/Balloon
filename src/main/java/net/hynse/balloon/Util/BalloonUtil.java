@@ -1,10 +1,14 @@
 package net.hynse.balloon.Util;
 
 import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
+import net.hynse.balloon.Balloon;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
@@ -32,7 +36,7 @@ public class BalloonUtil {
         Parrot parrot = (Parrot) player.getWorld().spawnEntity(player.getLocation().add(1, 2, 1), EntityType.PARROT);
         ArmorStand balloon = (ArmorStand) player.getWorld().spawnEntity(player.getLocation().add(0, 1, 0), EntityType.ARMOR_STAND);
         UUID parrotId = parrot.getUniqueId();
-        new BalloonFloatTask(parrot).runTaskTimerAtEntity(instance, parrot, 1L, 4L);
+        new BalloonFloatTask(parrot).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
         playerData.putLinked(playerId, parrotId);
         parrot.setTamed(true);
         parrot.setOwner(player);
@@ -41,6 +45,9 @@ public class BalloonUtil {
         parrot.setVariant(Parrot.Variant.GRAY);
         parrot.setAdult();
         parrot.setCollidable(false);
+
+        NamespacedKey key = new NamespacedKey(Balloon.instance, "balloonCleanUp");
+        parrot.getPersistentDataContainer().set(instance.balloonCleanUpKey, PersistentDataType.BOOLEAN, true);
 
         balloon.setCollidable(false);
         balloon.setInvisible(true);
@@ -52,7 +59,7 @@ public class BalloonUtil {
         balloon.setMarker(true);
         balloon.setHeadPose(new EulerAngle(Math.toRadians(180), Math.toRadians(0), Math.toRadians(0)));
 
-        ItemStack itemStack = new ItemStack(instance.balloonItem);
+        ItemStack itemStack = new ItemStack(Balloon.instance.balloonItem);
         ItemMeta itemMeta = itemStack.getItemMeta();
         itemMeta.setCustomModelData(customModelData);
         itemStack.setItemMeta(itemMeta);
@@ -60,7 +67,7 @@ public class BalloonUtil {
         balloon.customName(Component.text(player.getName() + "'s Balloon"));
         balloon.setCustomNameVisible(true);
         parrot.addPassenger(balloon);
-        instance.getLogger().info(player + "spawnBalloon" + customModelData);
+        Balloon.instance.getLogger().info(player + "spawnBalloon" + customModelData);
     }
 
     private void updateBalloon(UUID linkId, int customModelData, Player player) {
