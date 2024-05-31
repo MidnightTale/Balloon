@@ -55,9 +55,10 @@ public class BalloonUtil {
         parrot.setBreed(false);
         parrot.setLootTable(null);
         parrot.setInvulnerable(false);
+        parrot.setCustomName(player.getName() + "'s Balloon");
         Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_SCALE)).setBaseValue(0.4);
         Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_ARMOR)).setBaseValue(1024);
-        Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_GRAVITY)).setBaseValue(0.1);
+        Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_GRAVITY)).setBaseValue(0.27);
         Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE)).setBaseValue(-0.5);
         Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS)).setBaseValue(1024);
         Objects.requireNonNull(parrot.getAttribute(Attribute.GENERIC_MAX_HEALTH)).setBaseValue(1024);
@@ -137,42 +138,42 @@ public class BalloonUtil {
             if (parrot.getPersistentDataContainer().has(instance.balloonCleanUpKey)) {
                 double playerHeadY = player.getLocation().getY() + player.getEyeHeight();
                 double parrotY = parrot.getLocation().getY();
-                double parrotX = parrot.getLocation().getX();
-                double parrotZ = parrot.getLocation().getZ();
-                double playerX = player.getLocation().getX();
-                double playerZ = player.getLocation().getZ();
+//                double parrotX = parrot.getLocation().getX();
+//                double parrotZ = parrot.getLocation().getZ();
+//                double playerX = player.getLocation().getX();
+//                double playerZ = player.getLocation().getZ();
 
-                final double radius = 2.0;
-                final double height = 3.2;
-                final double halfSphereHeight = 3.2;
-
-                double distanceXZSquared = Math.pow(parrotX - playerX, 2) + Math.pow(parrotZ - playerZ, 2);
-                double distanceYAboveCylinder = parrotY - (playerHeadY + height - halfSphereHeight);
-
-                final double minDistanceXZSquared = Math.pow(radius, 2);
-                final double minDistanceYSquared = Math.pow(radius, 2);
-
-                boolean withinCylinder = (distanceXZSquared < minDistanceXZSquared) && (parrotY <= playerHeadY + height - halfSphereHeight);
-
-                boolean withinSphereCap = (distanceXZSquared + Math.pow(distanceYAboveCylinder, 2) < minDistanceYSquared);
-
-                if (withinCylinder || withinSphereCap) {
-                    double distanceSquared = Math.pow(parrotX - playerX, 2) + Math.pow(parrotY - playerHeadY, 2) + Math.pow(parrotZ - playerZ, 2);
-
-                    if (distanceSquared != 0) {
-                        double distance = Math.sqrt(distanceSquared);
-                        double factor = 0.05 / distance;
-                        double pushX = (parrotX - playerX) * factor;
-                        double pushY = (parrotY - playerHeadY) * factor;
-                        double pushZ = (parrotZ - playerZ) * factor;
-
-                        if (Double.isFinite(pushX) && Double.isFinite(pushY) && Double.isFinite(pushZ)) {
-                            Vector pushback = new Vector(pushX, pushY, pushZ);
-                            parrot.setVelocity(pushback);
-                        }
-                    }
-                }
-
+//                final double radius = 2.0;
+//                final double height = 3.2;
+//                final double halfSphereHeight = 3.2;
+//
+//                double distanceXZSquared = Math.pow(parrotX - playerX, 2) + Math.pow(parrotZ - playerZ, 2);
+//                double distanceYAboveCylinder = parrotY - (playerHeadY + height - halfSphereHeight);
+//
+//                final double minDistanceXZSquared = Math.pow(radius, 2);
+//                final double minDistanceYSquared = Math.pow(radius, 2);
+//
+//                boolean withinCylinder = (distanceXZSquared < minDistanceXZSquared) && (parrotY <= playerHeadY + height - halfSphereHeight);
+//
+//                boolean withinSphereCap = (distanceXZSquared + Math.pow(distanceYAboveCylinder, 2) < minDistanceYSquared);
+//
+//                if (withinCylinder || withinSphereCap) {
+//                    double distanceSquared = Math.pow(parrotX - playerX, 2) + Math.pow(parrotY - playerHeadY, 2) + Math.pow(parrotZ - playerZ, 2);
+//
+//                    if (distanceSquared != 0) {
+//                        double distance = Math.sqrt(distanceSquared);
+//                        double factor = 0.05 / distance;
+//                        double pushX = (parrotX - playerX) * factor;
+//                        double pushY = (parrotY - playerHeadY) * factor;
+//                        double pushZ = (parrotZ - playerZ) * factor;
+//
+//                        if (Double.isFinite(pushX) && Double.isFinite(pushY) && Double.isFinite(pushZ)) {
+//                            Vector pushback = new Vector(pushX, pushY, pushZ);
+//                            parrot.setVelocity(pushback);
+//                        }
+//                    }
+//                }
+//
 
                 double highAddition = playerHeadY + 0.4;
                 double mediumAddition = playerHeadY + 0.6;
@@ -211,27 +212,27 @@ public class BalloonUtil {
             }
 
         }
-        private void spawnParticleOutline(Location location, double radius, double height, double halfSphereHeight) {
-            // Spawn particles for the cylindrical part
-            for (double y = 0; y <= height - halfSphereHeight; y += 0.1) {
-                for (double theta = 0; theta < 2 * Math.PI; theta += Math.PI / 16) {
-                    double x = radius * Math.cos(theta);
-                    double z = radius * Math.sin(theta);
-                    location.getWorld().spawnParticle(Particle.WAX_OFF, location.clone().add(x, y, z), 0, 0, 0, 0, 0.1);
-                }
-            }
-
-            // Spawn particles for the spherical cap part
-            double centerY = height - halfSphereHeight;
-            for (double phi = 0; phi <= Math.PI / 2; phi += Math.PI / 16) {
-                for (double theta = 0; theta < 2 * Math.PI; theta += Math.PI / 16) {
-                    double x = radius * Math.sin(phi) * Math.cos(theta);
-                    double y = radius * Math.cos(phi);
-                    double z = radius * Math.sin(phi) * Math.sin(theta);
-                    location.getWorld().spawnParticle(Particle.WAX_ON, location.clone().add(x, centerY + y, z), 0, 0, 0, 0, 0.1);
-                }
-            }
-        }
+//        private void spawnParticleOutline(Location location, double radius, double height, double halfSphereHeight) {
+//            // Spawn particles for the cylindrical part
+//            for (double y = 0; y <= height - halfSphereHeight; y += 0.1) {
+//                for (double theta = 0; theta < 2 * Math.PI; theta += Math.PI / 16) {
+//                    double x = radius * Math.cos(theta);
+//                    double z = radius * Math.sin(theta);
+//                    location.getWorld().spawnParticle(Particle.WAX_OFF, location.clone().add(x, y, z), 0, 0, 0, 0, 0.1);
+//                }
+//            }
+//
+//            // Spawn particles for the spherical cap part
+//            double centerY = height - halfSphereHeight;
+//            for (double phi = 0; phi <= Math.PI / 2; phi += Math.PI / 16) {
+//                for (double theta = 0; theta < 2 * Math.PI; theta += Math.PI / 16) {
+//                    double x = radius * Math.sin(phi) * Math.cos(theta);
+//                    double y = radius * Math.cos(phi);
+//                    double z = radius * Math.sin(phi) * Math.sin(theta);
+//                    location.getWorld().spawnParticle(Particle.WAX_ON, location.clone().add(x, centerY + y, z), 0, 0, 0, 0, 0.1);
+//                }
+//            }
+//        }
     }
 
     public void disableBalloon(Player player) {
