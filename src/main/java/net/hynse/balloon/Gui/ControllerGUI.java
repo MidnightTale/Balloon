@@ -10,7 +10,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static net.hynse.balloon.Balloon.*;
+import static net.hynse.balloon.Balloon.balloonUtil;
+
 
 public class ControllerGUI implements Listener {
     @EventHandler

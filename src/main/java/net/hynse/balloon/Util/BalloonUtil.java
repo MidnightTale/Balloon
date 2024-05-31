@@ -3,7 +3,7 @@ package net.hynse.balloon.Util;
 import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
 import net.hynse.balloon.Balloon;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -24,7 +24,7 @@ public class BalloonUtil {
         playerData.putBalloonShow(playerId, true);
         playerData.putCustomModelData(playerId,customModelData);
         if (linkId != null) {
-            instance.getLogger().info(player + "updateBalloon" + customModelData);
+            //instance.getLogger().info(player + "updateBalloon" + customModelData);
             updateBalloon(linkId, customModelData, player);
             playerData.putBalloonShow(playerId, true);
         } else {
@@ -45,6 +45,10 @@ public class BalloonUtil {
         parrot.setVariant(Parrot.Variant.GRAY);
         parrot.setAdult();
         parrot.setCollidable(false);
+        parrot.setInvulnerable(true);
+        parrot.setInvisible(true);
+        parrot.setBreed(false);
+        parrot.setHealth(20);
 
         NamespacedKey key = new NamespacedKey(Balloon.instance, "balloonCleanUp");
         parrot.getPersistentDataContainer().set(instance.balloonCleanUpKey, PersistentDataType.BOOLEAN, true);
@@ -64,10 +68,9 @@ public class BalloonUtil {
         itemMeta.setCustomModelData(customModelData);
         itemStack.setItemMeta(itemMeta);
         balloon.getEquipment().setHelmet(itemStack);
-        balloon.customName(Component.text(player.getName() + "'s Balloon"));
-        balloon.setCustomNameVisible(true);
+        //balloon.customName(Component.text(player.getName() + "'s Balloon"));
+        balloon.setCustomNameVisible(false);
         parrot.addPassenger(balloon);
-        Balloon.instance.getLogger().info(player + "spawnBalloon" + customModelData);
     }
 
     private void updateBalloon(UUID linkId, int customModelData, Player player) {
@@ -96,7 +99,7 @@ public class BalloonUtil {
         }
     }
 
-    private static class BalloonFloatTask extends WrappedRunnable {
+    public static class BalloonFloatTask extends WrappedRunnable {
         private final Parrot parrot;
 
         public BalloonFloatTask(Parrot parrot) {
@@ -134,9 +137,21 @@ public class BalloonUtil {
                 if (parrotY < playerHeadY + 0.2) {
                     parrot.setVelocity(parrot.getVelocity().setY(0.24));
                 }
+                Location playerLocation = player.getLocation();
+                Location parrotLocation = parrot.getLocation();
+
+                distanceSquared = parrotLocation.distanceSquared(playerLocation);
+
+                final double maxDistanceSquared = 32;
+                if (distanceSquared > maxDistanceSquared) {
+                    Location teleportLocation = playerLocation.clone().add(0, 3, 0);
+                    parrot.setLeashHolder(player);
+                    parrot.teleportAsync(teleportLocation);
+                }
             } else {
                 cancel();
             }
+
         }
     }
 
@@ -155,10 +170,11 @@ public class BalloonUtil {
             for (Entity passenger : parrot.getPassengers()) {
                 if (passenger instanceof ArmorStand) {
                     passenger.remove();
-                    playerData.removeBalloonShow(playerId);
-                    playerData.removeLinked(playerId);
                 }
             }
+            playerData.removeBalloonShow(playerId);
+            playerData.removeLinked(playerId);
+            playerData.removeBalloonCustomModelData(playerId);
             parrot.remove();
         }
     }

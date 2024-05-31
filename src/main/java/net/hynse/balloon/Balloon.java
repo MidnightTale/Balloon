@@ -5,6 +5,7 @@ import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
 import net.hynse.balloon.Command.balloon;
 import net.hynse.balloon.Data.FlatData;
 import net.hynse.balloon.Data.PlayerData;
+import net.hynse.balloon.Event.LeashEvent;
 import net.hynse.balloon.Event.PlayerEvent;
 import net.hynse.balloon.Gui.ControllerGUI;
 import net.hynse.balloon.Gui.ItemGUI;
@@ -42,7 +43,7 @@ public class Balloon extends FoliaWrappedJavaPlugin implements Listener {
     @Override
     public void onEnable() {
         Register();
-        scheduleBalloonCleanupTask();
+        //scheduleBalloonCleanupTask();
     }
     @Override
     public void onDisable() {
@@ -58,6 +59,7 @@ public class Balloon extends FoliaWrappedJavaPlugin implements Listener {
         selectionGUI = new SelectionGUI();
         flatData = new FlatData();
         Objects.requireNonNull(getCommand("balloon")).setExecutor(new balloon());
+        getServer().getPluginManager().registerEvents(new LeashEvent(), this);
         getServer().getPluginManager().registerEvents(new PlayerEvent(), this);
         getServer().getPluginManager().registerEvents(new ControllerGUI(), this);
 
@@ -65,28 +67,28 @@ public class Balloon extends FoliaWrappedJavaPlugin implements Listener {
         flatData.loadConfig();
     }
 
-    private void scheduleBalloonCleanupTask() {
-        new WrappedRunnable() {
-            @Override
-            public void run() {
-                Bukkit.getOnlinePlayers().forEach(player -> {
-                    new WrappedRunnable() {
-                        @Override
-                        public void run() {
-                            player.getWorld().getNearbyEntities(player.getLocation(), 16, 16, 16).forEach(entity -> {
-                                if (entity instanceof Parrot parrot) {
-                                    if (parrot.getPersistentDataContainer().has(balloonCleanUpKey, PersistentDataType.BOOLEAN) && !parrot.isLeashed()) {
-                                        parrot.getPassengers().forEach(Entity::remove);
-                                        playerData.removeLinked(player.getUniqueId());
-                                        parrot.remove();
-                                    }
-                                }
-                            });
-                        }
-                    }.runTaskAtLocation(Balloon.instance, player.getLocation());
-                });
-            }
-        }.runTaskTimer(Balloon.instance, 10 * 20, 10 * 20);
-    }
+//    private void scheduleBalloonCleanupTask() {
+//        new WrappedRunnable() {
+//            @Override
+//            public void run() {
+//                Bukkit.getOnlinePlayers().forEach(player -> {
+//                    new WrappedRunnable() {
+//                        @Override
+//                        public void run() {
+//                            player.getWorld().getNearbyEntities(player.getLocation(), 16, 16, 16).forEach(entity -> {
+//                                if (entity instanceof Parrot parrot) {
+//                                    if (parrot.getPersistentDataContainer().has(balloonCleanUpKey, PersistentDataType.BOOLEAN) && !parrot.isLeashed()) {
+//                                        parrot.getPassengers().forEach(Entity::remove);
+//                                        playerData.removeLinked(player.getUniqueId());
+//                                        parrot.remove();
+//                                    }
+//                                }
+//                            });
+//                        }
+//                    }.runTaskAtLocation(Balloon.instance, player.getLocation());
+//                });
+//            }
+//        }.runTaskTimer(Balloon.instance, 10 * 20, 10 * 20);
+//    }
 
 }

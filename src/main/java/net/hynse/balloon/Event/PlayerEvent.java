@@ -2,19 +2,21 @@ package net.hynse.balloon.Event;
 
 import me.nahu.scheduler.wrapper.runnable.WrappedRunnable;
 import net.hynse.balloon.Balloon;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Parrot;
-import org.bukkit.entity.Player;
+import net.hynse.balloon.Util.BalloonUtil;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
 
-import static net.hynse.balloon.Balloon.*;
+import static net.hynse.balloon.Balloon.balloonUtil;
+import static net.hynse.balloon.Balloon.playerData;
+
 
 public class PlayerEvent implements Listener {
     @EventHandler
@@ -23,6 +25,23 @@ public class PlayerEvent implements Listener {
         UUID playerId = event.getPlayer().getUniqueId();
         Boolean state = playerData.getBalloonShow(playerId);
         RestoreBalloon(state, player);
+
+        new WrappedRunnable() {
+            @Override
+            public void run() {
+                player.getWorld().getNearbyEntities(player.getLocation(), 16, 16, 16).forEach(entity -> {
+                    if (entity instanceof Parrot parrot) {
+                        AnimalTamer owner = parrot.getOwner();
+                        if (owner != null && !((OfflinePlayer) owner).isOnline() && Boolean.TRUE.equals(parrot.getPersistentDataContainer().get(Balloon.instance.balloonCleanUpKey, PersistentDataType.BOOLEAN))) {
+                            parrot.getPassengers().forEach(Entity::remove);
+                            playerData.removeLinked(player.getUniqueId());
+                            parrot.setLeashHolder(null);
+                            parrot.remove();
+                        }
+                    }
+                });
+            }
+        }.runTaskAtLocation(Balloon.instance, player.getLocation());
     }
 
     @EventHandler
@@ -64,6 +83,7 @@ public class PlayerEvent implements Listener {
                 if (linkedEntity instanceof Parrot parrot) {
                     parrot.teleportAsync(player.getLocation().add(0, 1, 0));
                     parrot.setLeashHolder(player);
+                    new BalloonUtil.BalloonFloatTask(parrot).runTaskTimerAtEntity(Balloon.instance, parrot, 1L, 4L);
                 }
             } else {
                 int customModelData = playerData.getBalloonCustomModelData(playerId);
